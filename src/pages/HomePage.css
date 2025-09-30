@@ -1,0 +1,210 @@
+/* HomePage.css */
+.home-page {
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+.hero-section {
+  text-align: center;
+  margin-bottom: 60px;
+  padding: 40px 0;
+}
+
+.app-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.app-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.scenarios-grid {
+  margin-bottom: 80px;
+}
+
+.scenarios-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.scenario-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.scenario-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.scenario-card:hover::before {
+  transform: scaleX(1);
+}
+
+.scenario-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+}
+
+.scenario-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.scenario-name {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.scenario-description {
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.scenario-items-count {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.features-section {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 60px 40px;
+  backdrop-filter: blur(10px);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 24px;
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.feature-item h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.feature-item p {
+  color: #666;
+  line-height: 1.6;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .app-title {
+    font-size: 2.5rem;
+  }
+  
+  .app-subtitle {
+    font-size: 1rem;
+    padding: 0 20px;
+  }
+  
+  .scenarios-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .scenario-card {
+    padding: 24px 20px;
+  }
+  
+  .features-section {
+    padding: 40px 20px;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section {
+    margin-bottom: 40px;
+    padding: 20px 0;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .scenario-card {
+    padding: 20px 16px;
+  }
+  
+  .scenario-icon {
+    font-size: 2.5rem;
+  }
+  
+  .feature-icon {
+    font-size: 2rem;
+  }
+}
+
+
+

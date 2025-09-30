@@ -1,37 +1,25 @@
 import React from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
+import HomePage from './pages/HomePage'
+import ChecklistPage from './pages/ChecklistPage'
+import StatisticsPage from './pages/StatisticsPage'
 import Header from './components/Header'
-import Hero from './components/Hero'
-import About from './components/About'
-import Experience from './components/Experience'
-import Projects from './components/Projects'
-import Skills from './components/Skills'
-import Education from './components/Education'
-import Contact from './components/Contact'
-import Community from './components/Community'
-import Certifications from './components/Certifications'
-import CaseStudies from './components/CaseStudies'
 
 function App() {
   return (
-    <>
-      <Header />
-      <main>
-        <Hero />
-        <About />
-        <Experience />
-        <Projects />
-        <Skills />
-        <Education />
-        <Community />
-        <Certifications />
-        <CaseStudies />
-        <Contact />
-      </main>
-      <footer className="site-footer">
-        © {new Date().getFullYear()} Your Name. All rights reserved.
-      </footer>
-    </>
+    <Router>
+      <div className="App">
+        <Header />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/checklist/:scenario" element={<ChecklistPage />} />
+            <Route path="/statistics" element={<StatisticsPage />} />
+          </Routes>
+        </main>
+      </div>
+    </Router>
   )
 }
 
