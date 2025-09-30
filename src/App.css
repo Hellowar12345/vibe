@@ -1,0 +1,60 @@
+/* Layout */
+#root { max-width: 1100px; margin: 0 auto; padding: 24px; }
+main { display: block; }
+
+/* Header / Nav */
+.site-header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(6px); background: color-mix(in oklab, canvas, transparent 20%); }
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+.nav__brand { font-weight: 700; }
+.nav__links { list-style: none; display: flex; gap: 16px; padding: 0; margin: 0; }
+.nav__links a { color: inherit; opacity: 0.9; }
+.nav__links a:hover { opacity: 1; }
+
+/* Sections */
+.section { padding: 72px 0; text-align: left; }
+.container { max-width: 1100px; margin: 0 auto; }
+.section h2 { margin: 0 0 16px; font-size: 28px; }
+.section p { margin: 8px 0; }
+
+/* Hero */
+.hero { padding-top: 56px; }
+.hero__title { font-size: 48px; margin: 0 0 8px; }
+.hero__subtitle { opacity: 0.9; margin-bottom: 16px; }
+.hero__actions { display: flex; gap: 12px; }
+
+/* Buttons */
+.btn { border: 1px solid #646cff; padding: 10px 16px; border-radius: 8px; color: #646cff; background: transparent; display: inline-block; }
+.btn.primary { background: #646cff; color: white; }
+.btn:hover { filter: brightness(1.05); }
+
+/* Timeline */
+.timeline { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
+.timeline__item { padding: 16px; border: 1px solid rgba(100,108,255,0.25); border-radius: 12px; background: color-mix(in oklab, canvas, transparent 10%); }
+.timeline__header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.timeline__period { opacity: 0.8; font-size: 14px; }
+.bullets { margin: 8px 0 0; }
+
+/* Projects */
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.card.project { padding: 16px; border-radius: 12px; border: 1px solid rgba(100,108,255,0.25); background: color-mix(in oklab, canvas, transparent 10%); text-decoration: none; color: inherit; }
+.card.project h3 { margin: 0 0 8px; }
+
+/* Skills */
+.tags { list-style: none; padding: 0; margin: 0; display: flex; gap: 8px; flex-wrap: wrap; }
+.tag { padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(100,108,255,0.25); background: color-mix(in oklab, canvas, transparent 10%); font-size: 14px; }
+
+/* Lists */
+.list { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.list__item { padding: 16px; border-radius: 12px; border: 1px solid rgba(100,108,255,0.25); background: color-mix(in oklab, canvas, transparent 10%); }
+.list__title { font-weight: 600; }
+.list__subtitle { opacity: 0.85; font-size: 14px; }
+
+/* Footer */
+.site-footer { padding: 32px 0; opacity: 0.8; text-align: center; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr; }
+  .hero__title { font-size: 36px; }
+  .nav__links { display: none; }
+}
