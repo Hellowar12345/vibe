@@ -1,15 +1,211 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Your Name — Resume</title>
-    <meta name="description" content="Resume and portfolio of Your Name, Frontend Developer." />
-    <meta name="theme-color" content="#646cff" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Task Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        /* Simple transition for task items */
+        .task-item {
+            transition: all 0.2s ease-in-out;
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            
+            <!-- Header -->
+            <div class="text-center mb-6">
+                <h1 class="text-3xl font-bold text-slate-900">Daily Task Manager</h1>
+                <p class="text-slate-500 mt-2">Keep track of your tasks for today.</p>
+            </div>
+
+            <!-- Add Task Form -->
+            <form id="add-task-form" class="flex items-center gap-3 mb-6">
+                <input type="text" id="task-input" placeholder="e.g., Finish project report"
+                       class="flex-grow w-full px-4 py-3 bg-slate-100 border-2 border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" required>
+                <button type="submit"
+                        class="flex-shrink-0 bg-indigo-600 text-white font-semibold px-4 py-3 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-transform transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="inline-block"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span class="hidden sm:inline ml-2">Add Task</span>
+                </button>
+            </form>
+
+            <!-- Task List -->
+            <div id="task-list" class="space-y-3">
+                <!-- Tasks will be dynamically inserted here -->
+                <p id="loading-state" class="text-center text-slate-500 py-4">Loading tasks...</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Configuration ---
+        // These global variables are provided by the environment.
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "YOUR_API_KEY", authDomain: "...", projectId: "..." };
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const addTaskForm = document.getElementById('add-task-form');
+        const taskInput = document.getElementById('task-input');
+        const taskList = document.getElementById('task-list');
+        const loadingState = document.getElementById('loading-state');
+        
+        // --- Authentication ---
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                // User is signed in, we can now fetch and manage their tasks.
+                setupApp(user.uid);
+            } else {
+                // User is not signed in. Let's sign them in.
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken).catch(error => {
+                        console.error("Custom token sign-in failed:", error);
+                        signInAnonymously(auth); // Fallback to anonymous
+                    });
+                } else {
+                    signInAnonymously(auth).catch(error => {
+                        console.error("Anonymous sign-in failed:", error);
+                        loadingState.textContent = 'Could not connect. Please refresh.';
+                    });
+                }
+            }
+        });
+
+        // --- App Logic ---
+        function setupApp(userId) {
+            // Define the path to the user's private task collection
+            const tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+            
+            // Query to order tasks by creation time
+            const tasksQuery = query(tasksCollectionRef);
+
+            // --- Real-time listener for tasks ---
+            onSnapshot(tasksQuery, (snapshot) => {
+                const tasks = [];
+                snapshot.forEach(doc => {
+                    tasks.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort tasks in memory: completed tasks at the bottom, newest at the top
+                tasks.sort((a, b) => {
+                    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+                    return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
+                });
+                renderTasks(tasks);
+            }, (error) => {
+                console.error("Error fetching tasks: ", error);
+                loadingState.textContent = 'Failed to load tasks.';
+            });
+
+            // --- Add a new task ---
+            addTaskForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const taskText = taskInput.value.trim();
+                if (taskText) {
+                    try {
+                        await addDoc(tasksCollectionRef, {
+                            text: taskText,
+                            completed: false,
+                            createdAt: serverTimestamp()
+                        });
+                        taskInput.value = '';
+                    } catch (error) {
+                        console.error("Error adding task: ", error);
+                        alert("Could not add task. Please try again.");
+                    }
+                }
+            });
+
+            // --- Handle task completion and deletion using event delegation ---
+            taskList.addEventListener('click', async (e) => {
+                const target = e.target.closest('button');
+                if (!target) return;
+
+                const taskId = target.dataset.id;
+                if (!taskId) return;
+                
+                const taskDocRef = doc(db, `artifacts/${appId}/users/${userId}/tasks/${taskId}`);
+
+                if (target.dataset.action === 'toggle-complete') {
+                    const isCompleted = target.dataset.completed === 'true';
+                    try {
+                        await updateDoc(taskDocRef, { completed: !isCompleted });
+                    } catch (error) {
+                        console.error("Error updating task: ", error);
+                    }
+                }
+
+                if (target.dataset.action === 'delete') {
+                    try {
+                        await deleteDoc(taskDocRef);
+                    } catch (error) {
+                        console.error("Error deleting task: ", error);
+                    }
+                }
+            });
+        }
+
+        // --- Render function to display tasks ---
+        function renderTasks(tasks) {
+            taskList.innerHTML = ''; // Clear existing list
+            if (tasks.length === 0) {
+                loadingState.textContent = 'No tasks yet. Add one above!';
+                taskList.appendChild(loadingState);
+            } else {
+                tasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = `task-item flex items-center justify-between p-4 bg-slate-50 rounded-lg shadow-sm transition ${task.completed ? 'opacity-60' : ''}`;
+                    
+                    const textClass = task.completed ? 'line-through text-slate-500' : 'text-slate-800';
+                    
+                    taskElement.innerHTML = `
+                        <p class="flex-grow ${textClass}">${escapeHTML(task.text)}</p>
+                        <div class="flex-shrink-0 flex items-center gap-2 ml-4">
+                            <button data-id="${task.id}" data-action="toggle-complete" data-completed="${task.completed}" class="p-2 rounded-full hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                ${task.completed 
+                                    ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-green-600" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+                                    : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>'
+                                }
+                            </button>
+                            <button data-id="${task.id}" data-action="delete" class="p-2 rounded-full hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-red-500" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </button>
+                        </div>
+                    `;
+                    taskList.appendChild(taskElement);
+                });
+            }
+        }
+
+        // --- Utility to prevent HTML injection ---
+        function escapeHTML(str) {
+            const p = document.createElement('p');
+            p.textContent = str;
+            return p.innerHTML;
+        }
+
+    </script>
+</body>
 </html>
